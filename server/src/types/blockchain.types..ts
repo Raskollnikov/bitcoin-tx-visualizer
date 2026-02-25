@@ -1,24 +1,27 @@
 export interface Vin {
-  prev_out?: {
-    addr?: string;
+  txid?: string;
+  vout: number;
+  is_coinbase: boolean;
+  scriptsig: string;
+  sequence: number;
+  witness?: string[];
+  prevout: {
+    scriptpubkey?: string;
+    scriptpubkey_type?: string;
+    scriptpubkey_address?: string;
     value?: number;
-    spent?: boolean;
-    script?: string;
-  };
-  sequence?: number;
-  witness?: string;
-  script?: string;
+  } | null;
 }
 
 export interface Vout {
+  scriptpubkey: string;
+  scriptpubkey_type: string;
+  scriptpubkey_address?: string;
   value: number;
-  addr?: string;
-  script: string;
-  spent?: boolean;
 }
 
 export interface Transaction {
-  txid: string;
+  txid?: string;
   version: number;
   locktime: number;
   vin: Vin[];
@@ -49,7 +52,7 @@ export interface MempoolAddressSummary {
 }
 
 export interface AddressTx {
-  txid: string;
+  txid?: string;
   vin: Vin[];
   vout: Vout[];
   size: number;
@@ -72,7 +75,7 @@ export interface Block {
   size: number;
   weight: number;
   merkle_root: string;
-  previous_block_hash: string;
+  previousblockhash?: string;
   nonce: number;
   bits: number;
   difficulty: number;

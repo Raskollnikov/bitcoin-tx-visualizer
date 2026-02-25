@@ -5,12 +5,20 @@ import type {
   AddressTx,
   MempoolAddressSummary,
 } from "../types/blockchain.types.";
+import { cache, TTL } from "../middleware/cache";
 
 export const getTxInfo = async (req: Request, res: Response) => {
   const { txid } = req.params;
 
   if (!txid || typeof txid !== "string" || txid.length < 32) {
     return res.status(400).json({ error: "invalid or missing txid" });
+  }
+
+  const cacheKey = `tx:${txid}`;
+  const cached = cache(cacheKey, TTL.CONFIRMED_TX).get();
+
+  if (cached) {
+    return res.json({ data: cached, fromCache: true });
   }
 
   try {
@@ -22,6 +30,10 @@ export const getTxInfo = async (req: Request, res: Response) => {
       });
     }
     const data = (await response.json()) as Transaction;
+
+    const ttl = data.status.confirmed ? TTL.CONFIRMED_TX : TTL.UNCONFIRMED_TX;
+    cache(cacheKey, ttl).set(data);
+
     return res.json({ data });
   } catch (error) {
     console.error("getTxInfo error:", error);
@@ -33,11 +45,21 @@ export const getAddress = async (req: Request, res: Response) => {
   const { addr } = req.params;
 
   if (!addr || typeof addr !== "string" || addr.length < 26) {
-    return res.status(400).json({ error: "invalid or missing address" });
+    return res.status(400).json({ error: "Invalid or missing address" });
+  }
+
+  const cacheKey = `address:${addr}`;
+  const cached = cache(cacheKey, TTL.ADDRESS).get();
+
+  if (cached) {
+    return res.json({ data: cached, fromCache: true });
   }
 
   try {
-    const summaryRes = await fetch(`https://mempool.space/api/address/${addr}`);
+    const [summaryRes, txsRes] = await Promise.all([
+      fetch(`https://mempool.space/api/address/${addr}`),
+      fetch(`https://mempool.space/api/address/${addr}/txs`),
+    ]);
     if (!summaryRes.ok) {
       return res.status(summaryRes.status).json({
         error: `mempool.space error: ${summaryRes.statusText}`,
@@ -46,14 +68,12 @@ export const getAddress = async (req: Request, res: Response) => {
 
     const summary = (await summaryRes.json()) as MempoolAddressSummary;
 
-    const txsRes = await fetch(`https://mempool.space/api/address/${addr}/txs`);
-
     if (!txsRes.ok) {
       return res.status(txsRes.status).json({
         error: `mempool.space error: ${txsRes.statusText}`,
       });
     }
-    
+
     const txs = (await txsRes.json()) as AddressTx[];
 
     const combinedData = {
@@ -71,26 +91,42 @@ export const getAddress = async (req: Request, res: Response) => {
       next_after_txid: txs.length > 0 ? txs[txs.length - 1].txid : null,
     };
 
+    cache(cacheKey, TTL.ADDRESS).set(combinedData);
+
     return res.json({ data: combinedData });
   } catch (error) {
     console.error("getAddress error:", error);
-    return res.status(500).json({ error: "failed to fetch address data" });
+    return res.status(500).json({ error: "Failed to fetch address data" });
   }
 };
 
 export const getBlock = async (req: Request, res: Response) => {
   const { block } = req.params;
 
-  if (!block || typeof block !== "string" || block.length !== 64) {
+  if (!block || block.length < 64) {
     return res.status(400).json({
-      error: "invalid block hash ( must be 64 hexadecimal characters )",
+      error: "invalid block hash (must be 64 hex characters)",
     });
   }
 
-  try {
-    const base = "https://mempool.space/api";
+  const start = Number(req.query.start ?? 0);
 
-    const headerRes = await fetch(`${base}/block/${block}`);
+  if (isNaN(start) || start < 0 || start % 25 !== 0) {
+    return res.status(400).json({
+      error: "start must be a non-negative multiple of 25",
+    });
+  }
+
+  const cacheKey = `block:${block}:${start}`;
+  const cached = cache(cacheKey, TTL.BLOCK).get();
+  if (cached) return res.json({ data: cached, fromCache: true });
+
+  try {
+    const [headerRes, txRes] = await Promise.all([
+      fetch(`https://mempool.space/api/block/${block}`),
+      fetch(`https://mempool.space/api/block/${block}/txs/${start}`),
+    ]);
+
     if (!headerRes.ok) {
       return res.status(headerRes.status).json({
         error: `mempool.space error: ${headerRes.statusText}`,
@@ -98,49 +134,20 @@ export const getBlock = async (req: Request, res: Response) => {
     }
 
     const header = (await headerRes.json()) as Block;
+    const txs: Transaction[] = txRes.ok ? await txRes.json() : [];
 
-    const startStr = req.query.start as string | undefined;
-    const limitStr = req.query.limit as string | undefined;
-
-    const start = startStr ? Number(startStr) : 0;
-    const requestedLimit = limitStr ? Number(limitStr) : 25;
-
-    if (isNaN(start) || start < 0 || start % 25 !== 0) {
-      return res.status(400).json({
-        error: "start must be a multiple of 25",
-      });
-    }
-
-    const limit = Math.max(0, Math.min(requestedLimit, 100));
-
-    let recentTxs: Transaction[] = [];
-    let shownTxCount = 0;
-    let hasMore = false;
-
-    if (limit > 0) {
-      const txRes = await fetch(`${base}/block/${block}/txs/${start}`);
-
-      if (txRes.ok) {
-        recentTxs = (await txRes.json()) as Transaction[];
-        recentTxs = recentTxs.slice(0, limit);
-        shownTxCount = recentTxs.length;
-        hasMore = header.tx_count > start + shownTxCount;
-      } else {
-        console.warn(
-          `transaction fetch failed for block ${block} at start=${start}: ${txRes.status}`,
-        );
-      }
-    }
+    const hasMore = header.tx_count > start + txs.length;
 
     const responseData = {
       ...header,
-      recent_txs: recentTxs,
-      shown_tx_count: shownTxCount,
-      has_more_txs: hasMore,
-      next_start: hasMore ? start + shownTxCount : null,
+      txs,
+      has_more: hasMore,
+      next_start: hasMore ? start + txs.length : null,
+      current_start: start,
       total_tx_count: header.tx_count,
     };
 
+    cache(cacheKey, TTL.BLOCK).set(responseData);
     return res.json({ data: responseData });
   } catch (error) {
     console.error("getBlock error:", error);
