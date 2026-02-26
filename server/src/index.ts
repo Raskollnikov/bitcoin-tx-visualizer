@@ -5,6 +5,7 @@ import txRoute from "./routes/tx";
 import addressRoutes from "./routes/address";
 import blockRoutes from "./routes/block";
 import rateLimit from "express-rate-limit";
+import statsRoute from "./routes/stats";
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.get("/health", (_req: Request, res: Response) => {
 app.use("/api/tx", txRoute);
 app.use("/api/address", addressRoutes);
 app.use("/api/block", blockRoutes);
+app.use("/api/stats", statsRoute);
 
 const PORT = process.env.PORT || 3000;
 

@@ -154,3 +154,47 @@ export const getBlock = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "failed to fetch block" });
   }
 };
+
+// for main route of these website, i need following data ( BLOCK HEIGHT, mempool txs, fee rate adn difficulty )
+// so i am creating new route to get the data ( i could directly fetch the data on UI, but for cache ( not spamming third party API, i preferred these option ) )
+
+export const getNetworkStats = async (_req: Request, res: Response) => {
+  const cacheKey = "network:stats";
+  const cached = cache(cacheKey, TTL.UNCONFIRMED_TX).get();
+  if (cached) return res.json({ data: cached, fromCache: true });
+
+  try {
+    const [blocksRes, mempoolRes, feesRes, diffRes] = await Promise.all([
+      fetch("https://mempool.space/api/blocks/tip/height"),
+      fetch("https://mempool.space/api/mempool"),
+      fetch("https://mempool.space/api/v1/fees/recommended"),
+      fetch("https://mempool.space/api/v1/difficulty-adjustment"),
+    ]);
+
+    const [blockHeight, mempool, fees, diff] = await Promise.all([
+      blocksRes.ok ? blocksRes.json() : null,
+      mempoolRes.ok ? mempoolRes.json() : null,
+      feesRes.ok ? feesRes.json() : null,
+      diffRes.ok ? diffRes.json() : null,
+    ]);
+
+    const data = {
+      block_height: blockHeight ?? null,
+      mempool_count: mempool?.count ?? null,
+      mempool_vsize: mempool?.vsize ?? null,
+      fee_fastest: fees?.fastestFee ?? null,
+      fee_half_hour: fees?.halfHourFee ?? null,
+      fee_hour: fees?.hourFee ?? null,
+      fee_economy: fees?.economyFee ?? null,
+      difficulty_change: diff?.difficultyChange ?? null,
+      estimated_retarget: diff?.remainingTime ?? null,
+      progress_percent: diff?.progressPercent ?? null,
+    };
+
+    cache(cacheKey, TTL.UNCONFIRMED_TX).set(data);
+    return res.json({ data });
+  } catch (error) {
+    console.error("getNetworkStats error:", error);
+    return res.status(500).json({ error: "failed to fetch network stats" });
+  }
+};
