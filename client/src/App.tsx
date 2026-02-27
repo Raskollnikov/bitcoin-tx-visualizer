@@ -110,8 +110,8 @@ function AppInner() {
 
       <header className="sticky top-0 z-50 border-b border-gray-800/60 backdrop-blur-xl bg-[#060a0e]/80">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-500/40 to-transparent" />
-        <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-3 group">
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-2">
+          <Link to="/" className="flex items-center gap-2.5 group shrink-0">
             <BitcoinLogo />
             <div className="flex flex-col leading-tight select-none">
               <span className="text-orange-400 text-sm font-bold tracking-[0.15em]">
@@ -122,15 +122,19 @@ function AppInner() {
               </span>
             </div>
           </Link>
-          <NavCrumb />
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-800 bg-gray-900/60">
-              <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-              <span className="text-[9px] tracking-[0.2em] text-gray-500 uppercase">
-                Mainnet
-              </span>
-            </div>
+
+          <div className="hidden sm:flex flex-1 justify-center">
+            <NavCrumb />
           </div>
+          <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-gray-800 bg-gray-900/60">
+            <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+            <span className="text-[9px] tracking-[0.2em] text-gray-500 uppercase">
+              Mainnet
+            </span>
+          </div>
+        </div>
+        <div className="sm:hidden px-4 pb-2 -mt-1">
+          <NavCrumb />
         </div>
       </header>
 
