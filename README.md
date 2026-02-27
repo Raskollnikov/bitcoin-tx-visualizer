@@ -1,4 +1,5 @@
-# bitcoin transaction visualizer ( SUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII )
+# bitcoin transaction visualizer <br>
+( SUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII )
 
 > **part of my [bitcoin developer journey](https://github.com/Raskollnikov/bitcoin-developer-journey)**  
 > project 4/20 | status: ✅ **complete**
