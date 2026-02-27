@@ -2,8 +2,9 @@ import axios, { AxiosError } from "axios";
 import type { Transaction } from "../types";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
+  baseURL: "",
 });
+
 export async function fetchTx(txid: string): Promise<Transaction> {
   try {
     const res = await api.get(`/api/tx/${txid.trim()}`);

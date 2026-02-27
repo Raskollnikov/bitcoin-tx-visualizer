@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://bitcoin-tx-visualizer.vercel.app/api/:path*"
+    }
+  ]
+}
