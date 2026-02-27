@@ -26,7 +26,7 @@ export const getTxInfo = async (req: Request, res: Response) => {
 
     if (!response.ok) {
       return res.status(response.status).json({
-        error: `blockchain.info error: ${response.statusText}`,
+        error: `mempool.space error: ${response.statusText}`,
       });
     }
     const data = (await response.json()) as Transaction;
@@ -87,7 +87,7 @@ export const getAddress = async (req: Request, res: Response) => {
         summary.mempool_stats.funded_txo_sum -
         summary.mempool_stats.spent_txo_sum,
       mempool_tx_count: summary.mempool_stats.tx_count,
-      recent_txs: txs.slice(0, 25),
+      recent_txs: txs.slice(0, 50),
       next_after_txid: txs.length > 0 ? txs[txs.length - 1].txid : null,
     };
 
@@ -96,7 +96,7 @@ export const getAddress = async (req: Request, res: Response) => {
     return res.json({ data: combinedData });
   } catch (error) {
     console.error("getAddress error:", error);
-    return res.status(500).json({ error: "Failed to fetch address data" });
+    return res.status(500).json({ error: "failed to fetch address data" });
   }
 };
 
