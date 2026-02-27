@@ -11,7 +11,14 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://bitcoin-tx-visualizer-6me5-nmxwigpn9-arsen-akhalaias-projects.vercel.app",
+      "http://localhost:5173",
+    ],
+  }),
+);
 app.use(express.json());
 
 app.use(
