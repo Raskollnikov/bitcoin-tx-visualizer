@@ -60,7 +60,7 @@ function BitcoinLogo() {
     <motion.div
       whileHover={{ rotate: [0, -8, 8, -4, 0], scale: 1.05 }}
       transition={{ duration: 0.5 }}
-      className="relative"
+      className="relative select-none"
     >
       <div className="absolute inset-0 rounded-full bg-orange-500/20 blur-md scale-150" />
       <span
@@ -128,7 +128,7 @@ function AppInner() {
           </div>
           <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-gray-800 bg-gray-900/60">
             <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-            <span className="text-[9px] tracking-[0.2em] text-gray-500 uppercase">
+            <span className="text-[9px] tracking-[0.2em] text-gray-500 uppercase select-none cursor-pointer">
               Mainnet
             </span>
           </div>

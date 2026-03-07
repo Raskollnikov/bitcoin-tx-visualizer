@@ -93,8 +93,7 @@ function TxRow({ tx }: { tx: Transaction }) {
   return (
     <Link
       to={`/tx/${tx.txid}`}
-      // hover:bg-orange-950/10 gadaakete rorame
-      className="group flex  hover:bg-emerald-200/5 items-center gap-4 px-5 py-3.5 transition-colors border-b border-gray-800/50 last:border-0"
+      className="group flex hover:bg-emerald-200/5 items-center gap-3 px-4 py-3.5 transition-colors border-b border-gray-800/50 last:border-0"
     >
       <div className="shrink-0">
         {isCoinbase ? (
@@ -110,16 +109,21 @@ function TxRow({ tx }: { tx: Transaction }) {
 
       <div className="flex-1 min-w-0">
         <p className="font-mono text-[11px] text-orange-200/80 font-bold group-hover:text-orange-300 truncate transition-colors">
-          {shortenHash(tx.txid, 20)}
+          {shortenHash(tx.txid, 16)}
         </p>
         {isCoinbase && (
           <p className="text-[9px] text-yellow-600 tracking-widest mt-0.5">
             COINBASE REWARD
           </p>
         )}
+        {tx.fee > 0 && (
+          <p className={`text-[9px] mt-0.5 sm:hidden ${feeRateColor(feeRate)}`}>
+            {feeRate} sat/vB
+          </p>
+        )}
       </div>
 
-      <div className="flex items-center gap-6 shrink-0 text-right">
+      <div className="hidden sm:flex items-center gap-4 shrink-0 text-right">
         {tx.fee > 0 && (
           <div className="min-w-[72px]">
             <p className="text-[9px] text-gray-600 tracking-wider">Fee rate</p>
@@ -140,18 +144,30 @@ function TxRow({ tx }: { tx: Transaction }) {
             {satsToBtc(totalOut)} BTC
           </p>
         </div>
-        <svg
-          width="13"
-          height="13"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          className="text-gray-700 group-hover:text-orange-500 transition-colors shrink-0"
-        >
-          <path d="M5 12h14M12 5l7 7-7 7" />
-        </svg>
       </div>
+
+      <div className="sm:hidden shrink-0 text-right">
+        <p className="text-xs font-bold text-emerald-400 tabular-nums">
+          {satsToBtc(totalOut)} BTC
+        </p>
+        {tx.fee > 0 && (
+          <p className="text-[9px] text-gray-600 tabular-nums">
+            {tx.fee.toLocaleString()} sats
+          </p>
+        )}
+      </div>
+
+      <svg
+        width="13"
+        height="13"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        className="text-gray-700 group-hover:text-orange-500 transition-colors shrink-0"
+      >
+        <path d="M5 12h14M12 5l7 7-7 7" />
+      </svg>
     </Link>
   );
 }
@@ -222,28 +238,28 @@ export default function BlockPage() {
       <div className="relative rounded-2xl border border-gray-800/80 bg-gray-900/40 overflow-hidden mt-6">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-500/60 to-transparent" />
 
-        <div className="p-5 md:p-6">
-          <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
-            <div>
+        <div className="p-4 md:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
+            <div className="min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-[9px] tracking-[0.25em] text-orange-500/60 uppercase">
                   Block
                 </span>
               </div>
               <h1
-                className="text-4xl font-black text-white tracking-tight flex cursor-pointer"
+                className="text-3xl sm:text-4xl font-black text-white tracking-tight flex cursor-pointer"
                 onClick={() => navigate(`/block/${block.previousblockhash}`)}
                 title="go to prev block"
               >
                 <BiSolidChevronsLeft className="cursor-pointer" />
                 {block.height.toLocaleString()}
               </h1>
-              <p className="font-mono text-[11px] text-gray-600 mt-1.5 break-all">
+              <p className="font-mono text-[10px] text-gray-600 mt-1.5 break-all leading-relaxed">
                 {block.id}
               </p>
             </div>
-            <div className="flex flex-wrap gap-2.5 shrink-0">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-800 bg-gray-950/60">
+            <div className="flex flex-wrap gap-2 shrink-0 flex-col lg:flex-row">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl border-gray-800 bg-gray-950/60">
                 <span className="text-[9px] text-gray-600 tracking-widest uppercase">
                   TXS
                 </span>
@@ -251,43 +267,23 @@ export default function BlockPage() {
                   {block.tx_count.toLocaleString()}
                 </span>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-800 bg-gray-950/60">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-800 bg-gray-950/60">
                 <span className="text-[9px] text-gray-600 tracking-widest uppercase">
                   Mined
                 </span>
-                <span className="text-white font-bold text-sm">
+                <span className="text-white font-bold text-xs sm:text-sm">
                   {formatTime(block.timestamp)}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col">
+          <div className="grid grid-cols-2 gap-2.5">
             {[
               { label: "SIZE", value: `${(block.size / 1000).toFixed(1)} KB` },
               {
                 label: "WEIGHT",
                 value: `${(block.weight / 1000).toFixed(1)} KWU`,
-              },
-              {
-                label: "MERKLE Root",
-                value: block.merkle_root ? block.merkle_root.slice(0, 65) : "—",
-              },
-              {
-                label: "PREVIOUS",
-                value:
-                  block.height > 0 ? (
-                    <button
-                      onClick={() =>
-                        navigate(`/block/${block.previousblockhash}`)
-                      }
-                      className="text-orange-400 hover:text-orange-300 transition-colors font-bold cursor-pointer"
-                    >
-                      ← #{(block.height - 1).toLocaleString()}
-                    </button>
-                  ) : (
-                    <span className="text-yellow-500">Genesis</span>
-                  ),
               },
             ].map(({ label, value }) => (
               <div
@@ -300,12 +296,39 @@ export default function BlockPage() {
                 <p className="text-sm font-bold text-gray-100">{value}</p>
               </div>
             ))}
+            <div className="col-span-2 bg-gray-950/60 rounded-xl p-3.5 border border-gray-800/60">
+              <p className="text-[9px] text-gray-600 tracking-[0.2em] uppercase mb-1.5">
+                MERKLE ROOT
+              </p>
+              <p className="text-sm font-bold text-gray-100 break-all leading-relaxed">
+                {block.merkle_root ?? "—"}
+              </p>
+            </div>
+            <div className="col-span-2 bg-gray-950/60 rounded-xl p-3.5 border border-gray-800/60">
+              <p className="text-[9px] text-gray-600 tracking-[0.2em] uppercase mb-1.5">
+                PREVIOUS
+              </p>
+              <p className="text-sm font-bold text-gray-100">
+                {block.height > 0 ? (
+                  <button
+                    onClick={() =>
+                      navigate(`/block/${block.previousblockhash}`)
+                    }
+                    className="text-orange-400 hover:text-orange-300 transition-colors font-bold cursor-pointer"
+                  >
+                    ← #{(block.height - 1).toLocaleString()}
+                  </button>
+                ) : (
+                  <span className="text-yellow-500">Genesis</span>
+                )}
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="mt-4 rounded-2xl border border-gray-800/80 bg-gray-900/30 overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800/60">
+        <div className="flex items-center justify-between px-4 py-4 border-b border-gray-800/60">
           <div className="flex items-center gap-3">
             <span className="text-xs tracking-[0.2em] text-gray-400 uppercase">
               Transactions
@@ -333,7 +356,7 @@ export default function BlockPage() {
         )}
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-1.5 px-5 py-4 border-t border-gray-800/60 flex-wrap">
+          <div className="flex items-center justify-center gap-1.5 px-4 py-4 border-t border-gray-800/60 flex-wrap">
             <PageBtn disabled={currentPage === 0} onClick={() => goToPage(0)}>
               «
             </PageBtn>

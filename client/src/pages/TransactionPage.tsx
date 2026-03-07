@@ -1,22 +1,44 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useTx } from "../ hooks/useTx";
 import FlowDiagram from "../components/FlowDiagram";
 import SearchBar from "../components/SearchBar";
 import HeroHome from "../components/HeroHome";
 import { formatTime, satsToBtc } from "../utils/format";
 
-function CopyBtn({ value }: { value: string }) {
+function CopyBtn({ value, label }: { value: string; label?: string }) {
+  const handleCopy = () => {
+    navigator.clipboard.writeText(value);
+    toast.success(label ? `${label} copied` : "Copied!", {
+      position: "bottom-right",
+      autoClose: 1800,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: false,
+      style: {
+        background: "#0f1318",
+        border: "1px solid rgba(249,115,22,0.3)",
+        color: "#f97316",
+        fontFamily: "'IBM Plex Mono', monospace",
+        fontSize: "12px",
+        borderRadius: "12px",
+      },
+    });
+  };
+
   return (
     <button
-      onClick={() => navigator.clipboard.writeText(value)}
-      className="ml-2 opacity-40 hover:opacity-100 transition-opacity text-orange-400"
-      title="Copy"
+      onClick={handleCopy}
+      className="ml-2 shrink-0 cursor-pointer flex items-center gap-1.5 px-2 py-1 rounded-lg border border-gray-800 text-gray-600 hover:border-orange-600/50 hover:text-orange-400 transition-all duration-150 text-[10px] tracking-widest"
+      title="Copy transaction ID"
     >
       <svg
-        width="13"
-        height="13"
+        width="11"
+        height="11"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -25,6 +47,7 @@ function CopyBtn({ value }: { value: string }) {
         <rect x="9" y="9" width="13" height="13" rx="2" />
         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
       </svg>
+      COPY
     </button>
   );
 }
@@ -142,61 +165,59 @@ export default function TransactionPage() {
           >
             <div className="relative rounded-2xl border border-gray-800/80 bg-gray-900/40 overflow-hidden backdrop-blur-sm">
               <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-500/60 to-transparent" />
-              <div className="p-5 md:p-6">
-                <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span className="text-orange-400 flex gap-3 items-center text-xs tracking-[0.2em] font-semibold uppercase">
-                        Transaction
-                        <a
-                          href={`https://mempool.space/tx/${txid}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-center gap-1 text-[10px] tracking-widest px-2 py-1 rounded-md border transition-all border-gray-700 text-gray-500 hover:border-orange-600/60 hover:text-orange-400"
-                        >
-                          <svg
-                            width="11"
-                            height="11"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                            <polyline points="15 3 21 3 21 9" />
-                            <line x1="10" y1="14" x2="21" y2="3" />
-                          </svg>
-                          check
-                        </a>
+              <div className="p-4 md:p-6">
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-orange-400 text-xs tracking-[0.2em] font-semibold uppercase">
+                      Transaction
+                    </span>
+                    <a
+                      href={`https://mempool.space/tx/${txid}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-[10px] tracking-widest px-2 py-1 rounded-md border transition-all border-gray-700 text-gray-500 hover:border-orange-600/60 hover:text-orange-400"
+                    >
+                      <svg
+                        width="11"
+                        height="11"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        <polyline points="15 3 21 3 21 9" />
+                        <line x1="10" y1="14" x2="21" y2="3" />
+                      </svg>
+                      check
+                    </a>
+                    {isCoinbase && (
+                      <span className="text-[10px] bg-yellow-900/50 border border-yellow-700/40 text-yellow-400 px-2 py-0.5 rounded-full tracking-wider">
+                        ⛏ COINBASE
                       </span>
-                      {isCoinbase && (
-                        <span className="text-[10px] bg-yellow-900/50 border border-yellow-700/40 text-yellow-400 px-2 py-0.5 rounded-full tracking-wider">
-                          ⛏ COINBASE
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center">
-                      <p className="font-mono text-[11px] text-gray-400 break-all leading-relaxed">
-                        {tx.txid}
-                      </p>
-                      <CopyBtn value={tx.txid} />
-                    </div>
+                    )}
                   </div>
                   <div
-                    className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold tracking-widest border ${
+                    className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-widest border ${
                       tx.status.confirmed
                         ? "bg-emerald-950/60 border-emerald-700/40 text-emerald-400"
                         : "bg-amber-950/60 border-amber-700/40 text-amber-400 animate-pulse"
                     }`}
                   >
                     <span
-                      className={`w-1.5 h-1.5 rounded-full ${tx.status.confirmed ? "bg-emerald-400" : "bg-amber-400"}`}
+                      className={`w-1.5 h-1.5 rounded-full shrink-0 ${tx.status.confirmed ? "bg-emerald-400" : "bg-amber-400"}`}
                     />
-                    {tx.status.confirmed ? "CONFIRMED" : "UNCONFIRMED"}
+                    {tx.status.confirmed ? "CONFIRMED" : "PENDING"}
                   </div>
                 </div>
+                <div className="flex items-start mb-4">
+                  <p className="font-mono text-[10px] text-gray-500 break-all leading-relaxed flex-1">
+                    {tx.txid}
+                  </p>
+                  <CopyBtn value={tx.txid} label="TX ID" />
+                </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
                   {[
                     {
                       label: "FEE",
@@ -241,14 +262,14 @@ export default function TransactionPage() {
                   ].map(({ label, value, sub, accent, onClick }) => (
                     <div
                       key={label}
-                      className={`bg-gray-950/60 rounded-xl p-3.5 border border-gray-800/60 ${onClick ? "cursor-pointer hover:border-orange-600/50 transition-colors group" : ""}`}
+                      className={`bg-gray-950/60 rounded-xl p-3 border border-gray-800/60 ${onClick ? "cursor-pointer hover:border-orange-600/50 transition-colors group" : ""}`}
                       onClick={onClick}
                     >
                       <p className="text-[9px] text-gray-600 tracking-[0.2em] mb-1.5 uppercase">
                         {label}
                       </p>
                       <p
-                        className={`text-sm font-bold ${accent ? "text-orange-400 group-hover:text-orange-300" : "text-gray-100"}`}
+                        className={`text-sm font-bold leading-snug ${accent ? "text-orange-400 group-hover:text-orange-300" : "text-gray-100"}`}
                       >
                         {value}
                       </p>
@@ -261,7 +282,7 @@ export default function TransactionPage() {
                   ))}
                 </div>
 
-                <div className="mt-4 flex flex-wrap items-center gap-3 py-3 px-4 bg-gray-950/40 rounded-xl border border-gray-800/40">
+                <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 py-3 px-4 bg-gray-950/40 rounded-xl border border-gray-800/40">
                   <div className="flex items-center gap-2">
                     <span className="text-[9px] text-gray-600 tracking-widest uppercase">
                       Total In
@@ -281,7 +302,7 @@ export default function TransactionPage() {
                   </div>
                   {tx.fee > 0 && (
                     <>
-                      <div className="w-px h-4 bg-gray-800 mx-1" />
+                      <div className="w-px h-4 bg-gray-800 mx-1 hidden sm:block" />
                       <div className="flex items-center gap-2">
                         <span className="text-[9px] text-gray-600 tracking-widest uppercase">
                           Fee
@@ -303,7 +324,7 @@ export default function TransactionPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="rounded-2xl border border-gray-800/80 bg-gray-900/30 overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-800/60">
+                <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-800/60">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-orange-500" />
                     <span className="text-xs tracking-[0.2em] text-gray-400 uppercase">
@@ -319,7 +340,7 @@ export default function TransactionPage() {
                 </div>
                 <div className="divide-y divide-gray-800/40 max-h-[520px] overflow-y-auto">
                   {isCoinbase ? (
-                    <div className="px-5 py-4 flex items-center justify-between">
+                    <div className="px-4 py-4 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-yellow-900/30 border border-yellow-700/30 flex items-center justify-center text-sm">
                           ⛏
@@ -344,7 +365,7 @@ export default function TransactionPage() {
                       return (
                         <div
                           key={i}
-                          className={`px-5 py-3.5 flex items-center justify-between gap-3 transition-colors ${addr ? "hover:bg-orange-950/10 cursor-pointer group" : ""}`}
+                          className={`px-4 py-3.5 flex items-center justify-between gap-3 transition-colors ${addr ? "hover:bg-orange-950/10 cursor-pointer group" : ""}`}
                           onClick={() => addr && navigate(`/address/${addr}`)}
                         >
                           <div className="flex items-center gap-3 min-w-0">
@@ -378,7 +399,7 @@ export default function TransactionPage() {
               </div>
 
               <div className="rounded-2xl border border-gray-800/80 bg-gray-900/30 overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-800/60">
+                <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-800/60">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
                     <span className="text-xs tracking-[0.2em] text-gray-400 uppercase">
@@ -402,7 +423,7 @@ export default function TransactionPage() {
                     return (
                       <div
                         key={i}
-                        className={`px-5 py-3.5 transition-colors ${addr && !isOpReturn ? "hover:bg-emerald-950/10 cursor-pointer group" : ""}`}
+                        className={`px-4 py-3.5 transition-colors ${addr && !isOpReturn ? "hover:bg-emerald-950/10 cursor-pointer group" : ""}`}
                         onClick={() =>
                           addr && !isOpReturn && navigate(`/address/${addr}`)
                         }
@@ -453,7 +474,7 @@ export default function TransactionPage() {
                   })}
                 </div>
                 {tx.fee > 0 && (
-                  <div className="px-5 py-3 border-t border-gray-800/60 bg-amber-950/10 flex items-center justify-between">
+                  <div className="px-4 py-3 border-t border-gray-800/60 bg-amber-950/10 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-1.5 h-6 rounded-full bg-amber-500/40 shrink-0" />
                       <div>
@@ -476,7 +497,7 @@ export default function TransactionPage() {
             </div>
 
             <details className="group rounded-2xl border border-gray-800/60 bg-gray-900/20 overflow-hidden">
-              <summary className="px-5 py-4 cursor-pointer flex items-center justify-between text-xs text-gray-600 tracking-widest uppercase hover:text-gray-400 transition-colors list-none">
+              <summary className="px-4 py-4 cursor-pointer flex items-center justify-between text-xs text-gray-600 tracking-widest uppercase hover:text-gray-400 transition-colors list-none">
                 <span>Raw Details</span>
                 <svg
                   width="14"
@@ -490,7 +511,7 @@ export default function TransactionPage() {
                   <path d="M6 9l6 6 6-6" />
                 </svg>
               </summary>
-              <div className="px-5 pb-5 grid grid-cols-2 md:grid-cols-3 gap-3 border-t border-gray-800/40">
+              <div className="px-4 pb-4 grid grid-cols-2 md:grid-cols-3 gap-3 border-t border-gray-800/40">
                 {[
                   ["Version", tx.version],
                   ["Locktime", tx.locktime],
@@ -514,6 +535,8 @@ export default function TransactionPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ToastContainer limit={1} />
     </div>
   );
 }

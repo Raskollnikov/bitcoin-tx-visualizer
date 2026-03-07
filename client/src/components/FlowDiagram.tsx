@@ -21,6 +21,36 @@ const COL_LEFT = 20;
 const COL_RIGHT = W - NODE_W - 60;
 const COL_CENTER = (W - TX_W) / 2;
 
+function decodeOpReturn(scriptpubkey: string): string | null {
+  try {
+    if (!scriptpubkey.startsWith("6a")) return null;
+
+    let hex = scriptpubkey.slice(2);
+
+    if (hex.startsWith("4c")) {
+      hex = hex.slice(4);
+    } else if (hex.startsWith("4d")) {
+      hex = hex.slice(6);
+    } else {
+      hex = hex.slice(2);
+    }
+
+    if (!hex || hex.length % 2 !== 0) return null;
+
+    const bytes = new Uint8Array(
+      hex.match(/.{1,2}/g)!.map((b) => parseInt(b, 16)),
+    );
+    const text = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
+
+    const printable = text.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "");
+    if (printable.length < 3) return null;
+
+    return printable;
+  } catch {
+    return null;
+  }
+}
+
 function shortAddr(addr: string) {
   if (!addr || addr.length <= 14) return addr;
   return addr.slice(0, 7) + "…" + addr.slice(-7);
@@ -30,8 +60,12 @@ function formatBtc(sats: number) {
   return satsToBtc(sats);
 }
 
-function buildNodes(tx: Transaction): FlowNode[] {
-  const nodes: FlowNode[] = [];
+interface ExtFlowNode extends FlowNode {
+  opReturnMsg?: string | null;
+}
+
+function buildNodes(tx: Transaction): ExtFlowNode[] {
+  const nodes: ExtFlowNode[] = [];
   const isCoinbase = tx.vin[0]?.is_coinbase;
 
   const visInputs = tx.vin.slice(0, MAX_INPUTS);
@@ -77,15 +111,22 @@ function buildNodes(tx: Transaction): FlowNode[] {
     value: number;
     addr?: string;
     isMore?: boolean;
+    scriptpubkey?: string;
+    isOpReturn?: boolean;
   }[] = [];
+
   visOutputs.forEach((out) => {
     const addr = out.scriptpubkey_address;
+    const isOpReturn = out.scriptpubkey_type === "op_return" || !addr;
     outputItems.push({
       label: addr ? shortAddr(addr) : "OP_RETURN",
       value: out.value ?? 0,
       addr,
+      isOpReturn,
+      scriptpubkey: out.scriptpubkey,
     });
   });
+
   if (hidOutputs.length > 0) {
     const hidVal = hidOutputs.reduce((s, v) => s + (v.value ?? 0), 0);
     outputItems.push({
@@ -130,6 +171,10 @@ function buildNodes(tx: Transaction): FlowNode[] {
   });
 
   outputItems.forEach((item, i) => {
+    const msg =
+      item.isOpReturn && item.scriptpubkey
+        ? decodeOpReturn(item.scriptpubkey)
+        : null;
     nodes.push({
       id: `output-${i}`,
       label: item.label,
@@ -138,6 +183,7 @@ function buildNodes(tx: Transaction): FlowNode[] {
       y: outputStartY + i * outputSpacing,
       side: "right",
       isMore: item.isMore,
+      opReturnMsg: msg,
     });
   });
 
@@ -182,25 +228,163 @@ function strokeW(value: number, total: number) {
   return Math.max(2, Math.min(28, (value / total) * 80));
 }
 
+function OpReturnTooltip({
+  msg,
+  nodeX,
+  nodeY,
+  svgW,
+}: {
+  msg: string;
+  nodeX: number;
+  nodeY: number;
+  svgW: number;
+}) {
+  const pct = nodeX / svgW;
+  const transform =
+    pct > 0.7
+      ? "translateX(-80%)"
+      : pct < 0.3
+        ? "translateX(0%)"
+        : "translateX(-50%)";
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: `${(nodeX / svgW) * 100}%`,
+        top: `${nodeY}px`,
+        transform,
+        pointerEvents: "none",
+        zIndex: 50,
+      }}
+    >
+      <div
+        style={{
+          background: "linear-gradient(135deg, #0f0a1e 0%, #1a0f2e 100%)",
+          border: "1px solid rgba(124,58,237,0.6)",
+          borderRadius: "10px",
+          padding: "10px 14px",
+          maxWidth: "320px",
+          boxShadow:
+            "0 0 24px rgba(124,58,237,0.25), 0 4px 16px rgba(0,0,0,0.6)",
+          fontFamily: "'IBM Plex Mono', monospace",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            marginBottom: "7px",
+          }}
+        >
+          <div
+            style={{
+              width: "6px",
+              height: "6px",
+              borderRadius: "50%",
+              background: "#7c3aed",
+              boxShadow: "0 0 6px #7c3aed",
+            }}
+          />
+          <span
+            style={{
+              fontSize: "9px",
+              letterSpacing: "0.2em",
+              color: "#7c3aed",
+              textTransform: "uppercase",
+            }}
+          >
+            OP_RETURN message
+          </span>
+        </div>
+        <p
+          style={{
+            fontSize: "12px",
+            color: "#c4b5fd",
+            lineHeight: "1.6",
+            margin: 0,
+            wordBreak: "break-word",
+            fontStyle: "italic",
+          }}
+        >
+          "{msg}"
+        </p>
+        <div
+          style={{
+            position: "absolute",
+            bottom: "-7px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: 0,
+            height: 0,
+            borderLeft: "7px solid transparent",
+            borderRight: "7px solid transparent",
+            borderTop: "7px solid rgba(124,58,237,0.6)",
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function FlowDiagram({ tx, onAddressClick }: Props) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [svgRef, setSvgRef] = useState<SVGSVGElement | null>(null);
+  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const nodes = useMemo(() => buildNodes(tx), [tx]);
 
   const inputs = nodes.filter((n) => n.side === "left");
-  const outputs = nodes.filter((n) => n.side === "right");
+  const outputs = nodes.filter((n) => n.side === "right") as ExtFlowNode[];
   const txNode = nodes.find((n) => n.side === "center")!;
 
   const totalIn = inputs.reduce((s, n) => s + n.value, 0);
   const totalOut = outputs.reduce((s, n) => s + n.value, 0);
-
   const hasFee = tx.fee > 0;
+
+  function svgToContainerPx(
+    svgX: number,
+    svgY: number,
+  ): { x: number; y: number } | null {
+    if (!svgRef || !containerRef) return null;
+    const svgRect = svgRef.getBoundingClientRect();
+    const containerRect = containerRef.getBoundingClientRect();
+    const scaleX = svgRect.width / W;
+    const scaleY = svgRect.height / H;
+    return {
+      x: svgRect.left - containerRect.left + svgX * scaleX,
+      y: svgRect.top - containerRect.top + svgY * scaleY,
+    };
+  }
+
+  const hoveredOpReturn = hoveredId
+    ? (outputs.find((n) => n.id === hoveredId && n.opReturnMsg) as
+        | ExtFlowNode
+        | undefined)
+    : undefined;
+
+  const tooltipPos = hoveredOpReturn
+    ? svgToContainerPx(nodeX(hoveredOpReturn), hoveredOpReturn.y - 10)
+    : null;
+
+  const containerW = containerRef?.clientWidth ?? W;
 
   return (
     <div
+      ref={setContainerRef}
       className="w-full rounded-2xl border border-gray-800 bg-gray-950 p-2"
-      style={{ overflowX: "auto" }}
+      style={{ overflowX: "auto", position: "relative" }}
     >
+      {hoveredOpReturn?.opReturnMsg && tooltipPos && (
+        <OpReturnTooltip
+          msg={hoveredOpReturn.opReturnMsg}
+          nodeX={tooltipPos.x}
+          nodeY={tooltipPos.y - 10}
+          svgW={containerW}
+        />
+      )}
+
       <svg
+        ref={setSvgRef}
         viewBox={`0 0 ${W} ${H}`}
         width="100%"
         style={{
@@ -235,6 +419,20 @@ export default function FlowDiagram({ tx, onAddressClick }: Props) {
             filterUnits="userSpaceOnUse"
           >
             <feGaussianBlur stdDeviation="5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <filter
+            id="glowOpReturn"
+            x="-40"
+            y="-12"
+            width={NODE_W + 80}
+            height={NODE_H + 24}
+            filterUnits="userSpaceOnUse"
+          >
+            <feGaussianBlur stdDeviation="6" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -340,19 +538,14 @@ export default function FlowDiagram({ tx, onAddressClick }: Props) {
             const feeNodeX = COL_CENTER + TX_W + 80;
             const feeNodeY = txNode.y + TX_H + 40;
             const feeNodeCenterY = feeNodeY + feeNodeH / 2;
-
             const x1 = COL_CENTER + TX_W;
             const y1 = nodeCenterY(txNode);
             const x2 = feeNodeX;
             const y2 = feeNodeCenterY;
             const cp1x = x1 + (x2 - x1) * 0.5;
-            const cp1y = y1;
             const cp2x = x1 + (x2 - x1) * 0.5;
-            const cp2y = y2;
-            const feePath = `M ${x1} ${y1} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x2} ${y2}`;
-
+            const feePath = `M ${x1} ${y1} C ${cp1x} ${y1}, ${cp2x} ${y2}, ${x2} ${y2}`;
             const isHov = hoveredId === "tx-center";
-
             return (
               <g
                 opacity={
@@ -568,14 +761,17 @@ export default function FlowDiagram({ tx, onAddressClick }: Props) {
 
         {outputs.map((node) => {
           const isHov = hoveredId === node.id || hoveredId === "tx-center";
-
           const isOpReturn = node.label === "OP_RETURN";
+          const hasMsg = !!(node as ExtFlowNode).opReturnMsg;
           const isClickable = !!node.addr && !node.isMore && !isOpReturn;
+
           return (
             <g
               key={node.id}
               transform={`translate(${nodeX(node)}, ${node.y})`}
-              style={{ cursor: isClickable ? "pointer" : "default" }}
+              style={{
+                cursor: isClickable ? "pointer" : hasMsg ? "help" : "default",
+              }}
               onMouseEnter={() => setHoveredId(node.id)}
               onMouseLeave={() => setHoveredId(null)}
               onClick={() => {
@@ -587,11 +783,13 @@ export default function FlowDiagram({ tx, onAddressClick }: Props) {
                 height={NODE_H}
                 rx={8}
                 fill={
-                  isOpReturn ? "#0f0f1a" : node.isMore ? "#111827" : "#0f1923"
+                  isOpReturn ? "#0f0a1e" : node.isMore ? "#111827" : "#0f1923"
                 }
                 stroke={
                   isOpReturn
-                    ? "#4c1d95"
+                    ? isHov
+                      ? "#a855f7"
+                      : "#4c1d95"
                     : isHov
                       ? "#f97316"
                       : node.isMore
@@ -599,9 +797,16 @@ export default function FlowDiagram({ tx, onAddressClick }: Props) {
                         : "#1e3a2f"
                 }
                 strokeWidth={isHov ? 1.5 : 1}
-                filter={isHov ? "url(#glowRight)" : undefined}
+                filter={
+                  isHov && isOpReturn
+                    ? "url(#glowOpReturn)"
+                    : isHov
+                      ? "url(#glowRight)"
+                      : undefined
+                }
                 style={{ transition: "stroke 0.15s" }}
               />
+
               {!node.isMore && (
                 <rect
                   x={NODE_W - 3}
@@ -613,6 +818,7 @@ export default function FlowDiagram({ tx, onAddressClick }: Props) {
                   opacity={isHov ? 1 : 0.6}
                 />
               )}
+
               <text
                 x={NODE_W - 14}
                 y={NODE_H / 2 - 4}
@@ -620,12 +826,19 @@ export default function FlowDiagram({ tx, onAddressClick }: Props) {
                 fontSize={11}
                 fontFamily="'Courier New', monospace"
                 fill={
-                  node.isMore ? "#6b7280" : isOpReturn ? "#7c3aed" : "#d1d5db"
+                  node.isMore
+                    ? "#6b7280"
+                    : isOpReturn
+                      ? isHov
+                        ? "#c4b5fd"
+                        : "#7c3aed"
+                      : "#d1d5db"
                 }
                 fontWeight={isHov ? 600 : 400}
               >
                 {node.label}
               </text>
+
               {!node.isMore && (
                 <text
                   x={NODE_W - 14}
@@ -637,6 +850,47 @@ export default function FlowDiagram({ tx, onAddressClick }: Props) {
                 >
                   {formatBtc(node.value)} BTC
                 </text>
+              )}
+
+              {isOpReturn && hasMsg && (
+                <g>
+                  <circle
+                    cx={12}
+                    cy={NODE_H / 2}
+                    r={7}
+                    fill="none"
+                    stroke="#7c3aed"
+                    strokeWidth={isHov ? 1.5 : 0.8}
+                    opacity={isHov ? 0.9 : 0.5}
+                    style={{ transition: "all 0.2s" }}
+                  >
+                    {!isHov && (
+                      <animate
+                        attributeName="r"
+                        values="5;8;5"
+                        dur="2.5s"
+                        repeatCount="indefinite"
+                      />
+                    )}
+                    {!isHov && (
+                      <animate
+                        attributeName="opacity"
+                        values="0.5;0.15;0.5"
+                        dur="2.5s"
+                        repeatCount="indefinite"
+                      />
+                    )}
+                  </circle>
+                  <text
+                    x={12}
+                    y={NODE_H / 2 + 4}
+                    textAnchor="middle"
+                    fontSize={9}
+                    fill={isHov ? "#c4b5fd" : "#7c3aed"}
+                  >
+                    ✉
+                  </text>
+                </g>
               )}
             </g>
           );

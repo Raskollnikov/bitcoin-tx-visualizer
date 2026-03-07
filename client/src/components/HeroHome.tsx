@@ -25,18 +25,26 @@ const EXAMPLES = [
     badge: "PERSONAL",
     badgeColor: "text-orange-400 border-orange-800/50 bg-orange-950/30",
   },
+
+  {
+    label: "Arsen -> Mom",
+    txid: "26fc906de7a6756e99475b361c2d4091010b923522f0a4dda491068ea5074eb7",
+    desc: "new year's gift for mom, paid in Bitcoin, SUIII",
+    badge: "PERSONAL",
+    badgeColor: "text-amber-400 border-amber-800/50 bg-amber-950/30",
+  },
+  {
+    label: "message in 666,666th block",
+    txid: "057954bb28527ff9c7701c6fd2b7f770163718ded09745da56cc95e7606afe99",
+    desc: `overcome evil (Romans 12:21) "do not be overcome by evil, but overcome evil with good"`,
+    badge: "FAVORITE",
+    badgeColor: "text-amber-400 border-amber-800/50 bg-amber-950/30",
+  },
   {
     label: "bitcoin pizza",
     txid: "a1075db55d416d3ca199f55b6084e2115b9345e16c5cf302fc80e9d5fbf5d48d",
     desc: "10,000 BTC · May 22, 2010",
     badge: "LEGENDARY",
-    badgeColor: "text-amber-400 border-amber-800/50 bg-amber-950/30",
-  },
-  {
-    label: "Arsen -> Mom",
-    txid: "26fc906de7a6756e99475b361c2d4091010b923522f0a4dda491068ea5074eb7",
-    desc: "new year’s gift for mom, paid in Bitcoin, SUIII",
-    badge: "PERSONAL",
     badgeColor: "text-amber-400 border-amber-800/50 bg-amber-950/30",
   },
   {
@@ -122,17 +130,17 @@ function StatTile({
           ? "text-orange-400"
           : "text-gray-300";
   return (
-    <div className="flex flex-col items-center gap-1 px-4 py-3 rounded-xl border border-gray-800/60 bg-gray-900/40 min-w-[110px]">
+    <div className="flex flex-col items-center gap-1 px-3 py-3 rounded-xl border border-gray-800/60 bg-gray-900/40 min-w-[90px] flex-1">
       <div className="flex items-center gap-1.5">
         {live && (
           <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
         )}
-        <span className="text-[8px] tracking-[0.25em] text-gray-700 uppercase">
+        <span className="text-[8px] tracking-[0.2em] text-gray-700 uppercase text-center">
           {label}
         </span>
       </div>
       <span
-        className={`text-sm font-bold font-mono tabular-nums ${accentClass}`}
+        className={`text-xs font-bold font-mono tabular-nums ${accentClass} text-center`}
       >
         {value}
       </span>
@@ -143,9 +151,9 @@ function StatTile({
 
 function SkeletonTile() {
   return (
-    <div className="flex flex-col items-center gap-1 px-4 py-3 rounded-xl border border-gray-800/40 bg-gray-900/20 min-w-[110px] animate-pulse">
-      <div className="h-2 w-16 bg-gray-800 rounded" />
-      <div className="h-4 w-20 bg-gray-800 rounded mt-1" />
+    <div className="flex flex-col items-center gap-1 px-3 py-3 rounded-xl border border-gray-800/40 bg-gray-900/20 min-w-[90px] flex-1 animate-pulse">
+      <div className="h-2 w-14 bg-gray-800 rounded" />
+      <div className="h-4 w-16 bg-gray-800 rounded mt-1" />
     </div>
   );
 }
@@ -235,6 +243,8 @@ export default function HeroHome({
         .glitch-text.glitching::before { animation: glitch 0.15s steps(1) forwards; color: #f97316; left: 2px; }
         .glitch-text.glitching::after  { animation: glitch 0.15s steps(1) reverse forwards; color: #0ea5e9; left: -2px; }
         .scan-line { animation: scan-line 8s linear infinite; }
+        .scrollbar-none::-webkit-scrollbar { display: none; }
+        .examples-scroll::-webkit-scrollbar { display: none; }
       `}</style>
 
       <div className="relative min-h-[calc(100vh-56px)] flex flex-col items-center justify-center overflow-hidden -mt-6 -mx-4 px-4">
@@ -256,7 +266,7 @@ export default function HeroHome({
 
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-500/20 to-transparent scan-line pointer-events-none" />
 
-        <div className="relative z-10 w-full max-w-2xl mx-auto text-center space-y-8">
+        <div className="relative z-10 w-full max-w-2xl mx-auto text-center space-y-6">
           <div className="flex items-center justify-center gap-2">
             <div className="h-px w-12 bg-gradient-to-r from-transparent to-orange-500/50" />
             <span className="text-[9px] tracking-[0.4em] text-orange-500/60 uppercase select-none">
@@ -267,7 +277,7 @@ export default function HeroHome({
 
           <div className="space-y-2 select-none">
             <h1
-              className={`glitch-text text-5xl md:text-7xl font-black tracking-tighter text-white ${glitching ? "glitching" : ""}`}
+              className={`glitch-text text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter text-white ${glitching ? "glitching" : ""}`}
               data-text="TX VISUALIZER"
               style={{ fontFamily: "'IBM Plex Mono', monospace" }}
             >
@@ -284,7 +294,7 @@ export default function HeroHome({
             outputs, and fees with beautiful interactive diagrams
           </p>
 
-          <div className="space-y-3">
+          <div className="space-y-3 text-left">
             <div
               className="relative rounded-2xl transition-all duration-300"
               style={{
@@ -294,7 +304,7 @@ export default function HeroHome({
               }}
             >
               <div className="flex overflow-hidden rounded-2xl bg-gray-900/90 backdrop-blur-sm">
-                <div className="flex items-center pl-5 pr-3">
+                <div className="flex items-center pl-4 pr-3">
                   <svg
                     width="16"
                     height="16"
@@ -302,7 +312,7 @@ export default function HeroHome({
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
-                    className={`transition-colors ${focused ? "text-orange-500" : "text-gray-600"}`}
+                    className={`transition-colors shrink-0 ${focused ? "text-orange-500" : "text-gray-600"}`}
                   >
                     <circle cx="11" cy="11" r="8" />
                     <path d="m21 21-4.35-4.35" />
@@ -315,12 +325,12 @@ export default function HeroHome({
                   onFocus={() => setFocused(true)}
                   onBlur={() => setFocused(false)}
                   placeholder="paste transaction id…"
-                  className="flex-1 bg-transparent outline-none py-4.6 pr-3 text-sm text-white placeholder-gray-600 font-mono"
+                  className="flex-1 bg-transparent outline-none py-4 pr-2 text-sm text-white placeholder-gray-600 font-mono min-w-0"
                   autoComplete="off"
                   spellCheck={false}
                 />
                 {input.length > 0 && (
-                  <div className="flex items-center pr-3">
+                  <div className="hidden sm:flex items-center pr-3">
                     <span
                       className={`text-[9px] font-mono tabular-nums transition-colors ${isValid ? "text-emerald-500" : "text-gray-700"}`}
                     >
@@ -331,38 +341,62 @@ export default function HeroHome({
                 <button
                   onClick={() => handleSearch(input)}
                   disabled={!input.trim()}
-                  className="m-1.5 px-6 py-2.5 rounded-xl text-sm font-bold tracking-wider bg-orange-500 hover:bg-orange-400 disabled:opacity-30 disabled:cursor-not-allowed text-black transition-all hover:shadow-lg hover:shadow-orange-500/25"
+                  className="m-1.5 px-4 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold tracking-wider bg-orange-500 hover:bg-orange-400 disabled:opacity-30 disabled:cursor-not-allowed text-black transition-all hover:shadow-lg hover:shadow-orange-500/25 shrink-0 whitespace-nowrap"
                 >
                   SEARCH →
                 </button>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-              <span className="text-[9px] text-white-700 tracking-[0.25em] uppercase font-bold">
+            <div className="pt-1 text-left">
+              <span className="text-[9px] text-gray-600 tracking-[0.25em] uppercase font-bold block mb-2">
                 try:
               </span>
-              {EXAMPLES.map((ex) => (
-                <button
-                  key={ex.txid}
-                  onClick={() => handleSearch(ex.txid)}
-                  className="group cursor-pointer flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-800/80 bg-gray-900/50 hover:border-orange-600/40 hover:bg-orange-950/20 transition-all duration-200 text-left"
+              <div className="relative">
+                <div
+                  className="space-y-1.5 overflow-y-auto examples-scroll"
+                  style={{
+                    maxHeight: "180px",
+                    scrollBehavior: "smooth",
+                    scrollbarWidth: "none",
+                    msOverflowStyle: "none",
+                  }}
                 >
-                  <span
-                    className={`text-[8px] px-1.5 py-0.5 rounded border font-bold tracking-widest ${ex.badgeColor}`}
-                  >
-                    {ex.badge}
-                  </span>
-                  <div className="flex flex-col">
-                    <span className="text-[11px] text-orange-400/70 group-hover:text-orange-400 transition-colors leading-tight">
-                      {ex.label}
-                    </span>
-                    <span className="text-[9px] text-gray-700 leading-tight mt-0.5">
-                      {ex.desc}
-                    </span>
-                  </div>
-                </button>
-              ))}
+                  {EXAMPLES.map((ex) => (
+                    <button
+                      key={ex.txid}
+                      onClick={() => handleSearch(ex.txid)}
+                      className="group w-full cursor-pointer flex items-center gap-3 px-3 py-2.5 rounded-xl border border-gray-800/80 bg-gray-900/50 hover:border-orange-600/40 hover:bg-orange-950/20 transition-all duration-200 text-left"
+                    >
+                      <span
+                        className={`text-[8px] px-1.5 py-0.5 rounded border font-bold tracking-widest shrink-0 min-w-[58px] text-center ${ex.badgeColor}`}
+                      >
+                        {ex.badge}
+                      </span>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[11px] text-orange-400/70 group-hover:text-orange-400 transition-colors leading-tight truncate">
+                          {ex.label}
+                        </span>
+                        <span className="text-[9px] text-gray-700 leading-tight mt-0.5 truncate">
+                          {ex.desc}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-2 pointer-events-none rounded-b-xl"
+                  style={{
+                    background:
+                      "linear-gradient(to bottom, transparent, rgba(6,10,14,0.92))",
+                  }}
+                />
+                <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1 pointer-events-none">
+                  <div className="w-1 h-1 rounded-full bg-orange-500/40" />
+                  <div className="w-1 h-1 rounded-full bg-orange-500/20" />
+                  <div className="w-1 h-1 rounded-full bg-orange-500/20" />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -383,7 +417,7 @@ export default function HeroHome({
             ))}
           </div>
 
-          <div className="space-y-2 ">
+          <div className="space-y-2">
             <div className="flex items-center justify-center gap-2">
               <div className="h-px flex-1 max-w-[60px] bg-gray-800" />
               <span className="text-[8px] tracking-[0.3em] text-gray-700 uppercase">
@@ -392,7 +426,7 @@ export default function HeroHome({
               <div className="h-px flex-1 max-w-[60px] bg-gray-800" />
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-2">
+            <div className="flex items-stretch justify-center gap-2">
               {statsLoading ? (
                 <>
                   <SkeletonTile />
@@ -417,7 +451,7 @@ export default function HeroHome({
                     label="Priority Fee"
                     value={
                       stats.fee_fastest != null
-                        ? `${stats.fee_fastest} sat/vB`
+                        ? `${stats.fee_fastest} s/vB`
                         : "—"
                     }
                     accent="orange"

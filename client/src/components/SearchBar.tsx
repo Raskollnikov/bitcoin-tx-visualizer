@@ -53,7 +53,7 @@ export default function SearchBar({
 
   return (
     <div
-      className="space-y-4"
+      className="space-y-3"
       style={{ fontFamily: "'IBM Plex Mono', monospace" }}
     >
       <div className="relative">
@@ -68,7 +68,7 @@ export default function SearchBar({
         />
 
         <div className="flex gap-0 overflow-hidden rounded-2xl bg-gray-900/80 border border-transparent">
-          <div className="flex items-center pl-5 pr-3 text-gray-600">
+          <div className="flex items-center pl-4 pr-3 text-gray-600">
             {loading ? (
               <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
             ) : (
@@ -95,7 +95,7 @@ export default function SearchBar({
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             placeholder="paste transaction id…"
-            className="flex-1 bg-transparent outline-none py-4 pr-4 text-sm text-white placeholder-gray-600 font-mono"
+            className="flex-1 bg-transparent outline-none py-3.5 pr-2 text-sm text-white placeholder-gray-600 font-mono min-w-0"
             autoComplete="off"
             spellCheck={false}
           />
@@ -110,7 +110,7 @@ export default function SearchBar({
                   setInput("");
                   inputRef.current?.focus();
                 }}
-                className="px-3 text-gray-600 hover:text-gray-400 transition-colors"
+                className="px-2 text-gray-600 hover:text-gray-400 transition-colors shrink-0"
               >
                 <svg
                   width="14"
@@ -130,17 +130,20 @@ export default function SearchBar({
             onClick={() => handleSearch()}
             disabled={loading || !input.trim()}
             whileTap={{ scale: 0.97 }}
-            className="m-1.5 px-7 py-2.5 rounded-xl text-sm font-bold tracking-wider
+            className="m-1.5 px-4 sm:px-7 py-2 rounded-xl text-xs sm:text-sm font-bold tracking-wider
               bg-orange-500 hover:bg-orange-400 disabled:opacity-30 disabled:cursor-not-allowed
-              text-black transition-colors"
+              text-black transition-colors shrink-0 whitespace-nowrap"
           >
             {loading ? "…" : "search →"}
           </motion.button>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-start gap-2">
-        <span className="text-[10px] text-white-600 tracking-widest uppercase mt-1.5 mr-1 font-bold">
+      <div
+        className="flex items-start gap-2 overflow-x-auto pb-1 scrollbar-none flex-col lg:flex-row"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        <span className="text-[10px] text-white-600 tracking-widest uppercase mt-1.5 mr-1 font-bold shrink-0">
           TRY:
         </span>
         {EXAMPLES.map((ex) => (
@@ -150,13 +153,13 @@ export default function SearchBar({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => handleSearch(ex.txid)}
-            className="group flex flex-col px-3 py-1.5 rounded-lg border border-gray-800 bg-gray-900/60
+            className="group w-full lg:w-[300px] flex flex-col shrink-0 px-3 py-1.5 rounded-lg border border-gray-800 bg-gray-900/60
               hover:border-orange-600/50 hover:bg-orange-950/20 transition-all text-left"
           >
-            <span className="text-[11px] text-orange-400/80 group-hover:text-orange-400 transition-colors">
+            <span className="text-[11px] text-orange-400/80 group-hover:text-orange-400 transition-colors whitespace-nowrap">
               {ex.label}
             </span>
-            <span className="text-[9px] text-gray-700 group-hover:text-gray-600 tracking-wider mt-0.5">
+            <span className="text-[9px] text-gray-700 group-hover:text-gray-600 tracking-wider mt-0.5 whitespace-nowrap">
               {ex.desc}
             </span>
           </motion.button>
