@@ -41,29 +41,6 @@ i learned so much about real data inside block ( of bitcoin ) i was dealing that
 - **size/weight metrics** -> understand transaction cost factors
 - **clickable addresses** -> click any input/output address to explore it ( +blocks it was minned in )
 
- 
-### Visualize OP_Return message 
-i added new feature in order to see the attached messages in the transaction <br>
-in my favorite transaction which exists in the block: 666,666 anonymous person created transaction with message: <br>
-(Romans 12:21) "do not be overcome by evil, but overcome evil with good" <br>
-i wanted to added the hover effect on the op_return message <br>
-but in transaction we can only attach the messages in hex format ( which can be translated to string ) 
-<img width="1559" height="769" alt="image" src="https://github.com/user-attachments/assets/730fdda6-81b5-46bd-ab11-f62bc3f13153" />
-
-If we convert these characters to Text we will get: 
-
-<img width="658" height="455" alt="image" src="https://github.com/user-attachments/assets/b4074a86-fadf-4308-8d16-2e8fe9738552" />
-
-
-in my website i added that transaction 
-
-<img width="1326" height="996" alt="image" src="https://github.com/user-attachments/assets/f7792b11-97eb-4289-9725-89d8cdbfe47e" />
-
-now it's available to see it's message too ( Lets gooo!!! ) 
-
-<img width="1264" height="832" alt="image" src="https://github.com/user-attachments/assets/5c998c44-9ceb-450d-871f-dc8da5fae62a" />
-
-LINK: [romans 12:21](https://bitcoin-tx-visualizer-6me5.vercel.app/tx/057954bb28527ff9c7701c6fd2b7f770163718ded09745da56cc95e7606afe99)
 
 ### address explorer
 - **balance** -> current confirmed + mempool balance
@@ -84,6 +61,38 @@ LINK: [romans 12:21](https://bitcoin-tx-visualizer-6me5.vercel.app/tx/057954bb28
 <img width="1427" height="950" alt="image" src="https://github.com/user-attachments/assets/7588adbc-caf0-445b-a9e4-e223a81c6744" />
 <img width="840" height="942" alt="image" src="https://github.com/user-attachments/assets/2c0fc9a4-8dc2-40ae-8fcd-57c4dceec485" />
 
+
+
+### Visualize OP_Return message 
+
+i added a new feature that allows users to view messages attached to Bitcoin transactions <br>
+
+in my favorite transaction which appears in block 666,666 an anonymous person created a transaction containing the message: <br>
+
+(Romans 12:21) <br>
+"Do not be overcome by evil, but overcome evil with good." <br>
+
+i wanted to add a hover effect to display the OP_RETURN message <br>
+
+in Bitcoin transactions, messages can only be attached in hexadecimal format, which can then be translated into a readable string <br>
+
+<img width="1559" height="769" alt="image" src="https://github.com/user-attachments/assets/730fdda6-81b5-46bd-ab11-f62bc3f13153" />
+
+i created decodeOpReturn function so if we convert these characters to Text we will get:  <br>
+
+<img width="1621" height="798" alt="image" src="https://github.com/user-attachments/assets/754e5977-41bc-4b3e-b88e-ffee2cef6b4a" />
+
+
+in my website i added that transaction <br>
+
+<img width="1326" height="996" alt="image" src="https://github.com/user-attachments/assets/f7792b11-97eb-4289-9725-89d8cdbfe47e" />
+
+now it's available to see it's message too ( Lets gooo!!! )  <br>
+
+<img width="1264" height="832" alt="image" src="https://github.com/user-attachments/assets/5c998c44-9ceb-450d-871f-dc8da5fae62a" />
+
+LINK: [romans 12:21](https://bitcoin-tx-visualizer-6me5.vercel.app/tx/057954bb28527ff9c7701c6fd2b7f770163718ded09745da56cc95e7606afe99)
+<br>
 
 ###  user experience
 - **dark UI** optimized for readability
