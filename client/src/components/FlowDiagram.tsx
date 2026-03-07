@@ -42,6 +42,7 @@ function decodeOpReturn(scriptpubkey: string): string | null {
     );
     const text = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
 
+    // eslint-disable-next-line no-control-regex
     const printable = text.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "");
     if (printable.length < 3) return null;
 
