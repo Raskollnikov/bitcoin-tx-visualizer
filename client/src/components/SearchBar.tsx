@@ -1,6 +1,11 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
+/*
+disclaimer: The transactions referenced here are publicly visible records from the blockchain and are used purely for educational and illustrative purposes,
+because the Bitcoin blockchain is completely public, anyone can view any transaction and attach their own description or narrative to it without actually being involved in that transaction,
+the labels such as “me → Satoshi” or “me → Mom” are simply fictional examples meant to demonstrate how transactions can be explored and interpreted, not claims of ownership or participation,
+no identity can be reliably linked to a transaction solely by its TXID unless the owner of the sending address cryptographically proves control of the private key
+*/
 const EXAMPLES = [
   {
     label: "genesis block coinbase",
