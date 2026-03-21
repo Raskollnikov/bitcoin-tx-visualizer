@@ -63,9 +63,13 @@ i learned so much about real data inside block ( of bitcoin ) i was dealing that
 - **block details** — height, timestamp, miner, size, weight
 - **transaction list** — all TXs in the block with pagination
 - **mining stats** — difficulty, nonce, merkle root
-- **navigation** — explore previous blocks too ( i wanna add search on block too right now navigation only happens w params ) 
-
+- **navigation** — explore previous blocks too ( i wanna add search on block too right now navigation only happens w params )
+- 
+<img width="1271" height="976" alt="image" src="https://github.com/user-attachments/assets/3075bafe-78ae-454a-b31d-fbbc88be1510" />
 <img width="1427" height="950" alt="image" src="https://github.com/user-attachments/assets/14e91bd5-65d0-473d-ac05-6fb4a74fb71d" />
+<img width="1478" height="992" alt="image" src="https://github.com/user-attachments/assets/0806fa86-ad5f-4f68-ba05-eb71d87f7e58" />
+<img width="1478" height="992" alt="image" src="https://github.com/user-attachments/assets/efada2ef-25be-48e5-9959-740000f2d25a" />
+
 <img width="1427" height="950" alt="image" src="https://github.com/user-attachments/assets/7588adbc-caf0-445b-a9e4-e223a81c6744" />
 <img width="840" height="942" alt="image" src="https://github.com/user-attachments/assets/2c0fc9a4-8dc2-40ae-8fcd-57c4dceec485" />
 
