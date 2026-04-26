@@ -25,12 +25,13 @@ const EXAMPLES = [
     badge: "GENESIS",
     badgeColor: "text-yellow-400 border-yellow-800/50 bg-yellow-950/30",
   },
+
   {
-    label: "Arsen -> Satoshi",
-    txid: "a73335706adad5c400453fbc3c992f23cacf56b0ca964bc584f5f44ac7e0d412",
-    desc: "I sent Bitcoin to Satoshi's legacy address",
-    badge: "PERSONAL",
-    badgeColor: "text-orange-400 border-orange-800/50 bg-orange-950/30",
+    label: "Arsen -> Andreas Antonopoulos",
+    txid: "aab7c94b8a213a222092c65aa7645d555d0a8b5b791815a30704cfe858a70303",
+    desc: "Joined a historic bitcoin support for Andreas Antonopoulos in 2017, turning community respect into real-world value.",
+    badge: "LEGENDARY",
+    badgeColor: "text-amber-400 border-amber-800/50 bg-amber-950/30",
   },
 
   {
@@ -48,12 +49,20 @@ const EXAMPLES = [
     badgeColor: "text-amber-400 border-amber-800/50 bg-amber-950/30",
   },
   {
+    label: "Arsen -> Satoshi",
+    txid: "a73335706adad5c400453fbc3c992f23cacf56b0ca964bc584f5f44ac7e0d412",
+    desc: "I sent Bitcoin to Satoshi's legacy address",
+    badge: "PERSONAL",
+    badgeColor: "text-orange-400 border-orange-800/50 bg-orange-950/30",
+  },
+  {
     label: "bitcoin pizza",
     txid: "a1075db55d416d3ca199f55b6084e2115b9345e16c5cf302fc80e9d5fbf5d48d",
     desc: "10,000 BTC · May 22, 2010",
     badge: "LEGENDARY",
     badgeColor: "text-amber-400 border-amber-800/50 bg-amber-950/30",
   },
+
   {
     label: "Anonymous → Anonymous",
     txid: "f4330fd91a9b19feaa4e691f88ab3d5047e5268b69ca41870267deab1bd67c8a",
@@ -363,7 +372,7 @@ export default function HeroHome({
                 <div
                   className="space-y-1.5 overflow-y-auto examples-scroll"
                   style={{
-                    maxHeight: "180px",
+                    maxHeight: "300px",
                     scrollBehavior: "smooth",
                     scrollbarWidth: "none",
                     msOverflowStyle: "none",

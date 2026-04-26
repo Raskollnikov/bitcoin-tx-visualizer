@@ -8,10 +8,11 @@ no identity can be reliably linked to a transaction solely by its TXID unless th
 */
 const EXAMPLES = [
   {
-    label: "genesis block coinbase",
-    txid: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b",
-    desc: "Block #0 · Jan 3, 2009",
-    title: "first event in Bitcoin space",
+    label: "me -> Mom",
+    txid: "26fc906de7a6756e99475b361c2d4091010b923522f0a4dda491068ea5074eb7",
+    desc: "New Year's gift for mom, paid in Bitcoin",
+    title:
+      "it was the first time, i sent money to my mom for christmas as a gift, using Bitcoin instead of mastercard",
   },
   {
     label: "me -> Satoshi",
@@ -20,17 +21,23 @@ const EXAMPLES = [
     title: "personal gratitude to the creator of the Evolution!! ( Bitcoin )",
   },
   {
+    label: "me -> Andreas Antonopoulos",
+    txid: "aab7c94b8a213a222092c65aa7645d555d0a8b5b791815a30704cfe858a70303",
+    desc: "I sent ~0.7BTC to Andreas in 2017",
+    title:
+      "One of 1,000+ contributors who supported Andreas Antonopoulos in the 2017 community donation wave",
+  },
+  {
     label: "bitcoin pizza",
     txid: "a1075db55d416d3ca199f55b6084e2115b9345e16c5cf302fc80e9d5fbf5d48d",
     desc: "Block #57,043 · 10,000 BTC",
     title: "most expensive Pizza ever",
   },
   {
-    label: "me -> Mom",
-    txid: "26fc906de7a6756e99475b361c2d4091010b923522f0a4dda491068ea5074eb7",
-    desc: "New Year's gift for mom, paid in Bitcoin",
-    title:
-      "it was the first time, i sent money to my mom for christmas as a gift, using Bitcoin instead of mastercard",
+    label: "genesis block coinbase",
+    txid: "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b",
+    desc: "Block #0 · Jan 3, 2009",
+    title: "first event in Bitcoin space",
   },
 ];
 
